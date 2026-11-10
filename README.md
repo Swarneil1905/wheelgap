@@ -88,6 +88,24 @@ targets = ["linux-x86_64", "linux-aarch64", "musl-aarch64"]
 glibc = "2.31"
 ```
 
+For uv projects, wheelgap also reads `[tool.uv] required-environments` as default targets:
+
+```toml
+[tool.uv]
+required-environments = ["sys_platform == 'linux' and platform_machine == 'aarch64'"]
+```
+
+Target selection uses `-t` first, then `--dockerfile`, then `[tool.wheelgap] targets`, then uv's
+`required-environments`, then the built-in defaults. Each marker is evaluated against the eight common
+native platforms using the selected Python versions. A platform is included if any marker matches
+for any selected Python, and the resulting platforms are checked for all selected Pythons.
+Linux markers select both glibc and musl targets, since markers cannot distinguish the libc;
+the example above selects `linux-aarch64` and `musl-aarch64`. Use `-t` to choose one explicitly.
+An inferred selection is explained on stderr, including with `--json` or `--markdown`.
+An absent or empty list keeps the built-in defaults; invalid markers or a nonempty list matching
+no supported target are errors. Only `required-environments` is used here: `environments`, extra
+Linux architectures, mobile and Pyodide targets are not inferred.
+
 Each cell in the table is one of:
 
 | cell | meaning |
