@@ -86,10 +86,11 @@ def test_distro_does_not_select_targets(capsys, fixtures, distro, selection):
     assert json.loads(before)["targets"] == json.loads(after)["targets"]
 
 
+@pytest.mark.parametrize("flags", [[], ["--distro", "debian-12"]])
 @pytest.mark.parametrize("config", ["distro = 22", 'distro = "typo"', 'distro = ""'])
-def test_invalid_config_distro(capsys, tmp_path, fake_pypi, config):
+def test_invalid_config_distro(capsys, tmp_path, fake_pypi, config, flags):
     (tmp_path / "pyproject.toml").write_text("[tool.wheelgap]\n" + config, encoding="utf-8")
-    code, out, err = run(capsys, str(tmp_path))
+    code, out, err = run(capsys, str(tmp_path), *flags)
     assert code == 2 and not out and not fake_pypi
     assert "distro" in err and "ubuntu-22.04" in err
 

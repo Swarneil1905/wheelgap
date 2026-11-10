@@ -405,9 +405,10 @@ def report_json(
 def libc_versions(args: argparse.Namespace, config: dict) -> tuple[str, str]:
     """CLI libc > CLI distro > Dockerfile/config libc > config distro > built-ins."""
     defaults = {}
-    if args.distro is None and "distro" in config:
-        key, version = resolve_distro(config["distro"])
-        defaults[key] = version
+    if "distro" in config:
+        key, version = resolve_distro(config["distro"])  # validate it even when --distro wins
+        if args.distro is None:
+            defaults[key] = version
     defaults.update(config)
     if args.distro is not None:
         key, version = resolve_distro(args.distro)
