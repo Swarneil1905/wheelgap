@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Set the glibc or musl version by distro name with `--distro` or `distro` in `[tool.wheelgap]`, without changing the selected platforms. Explicit libc flags still win; `--list-targets` lists the supported distros. (thanks [@Swarneil1905](https://github.com/Swarneil1905))
+
 - `--online` no longer looks up packages from a private index on public PyPI: only packages whose lockfile index is PyPI are re-checked, the rest keep their locked files, and a note says how many. `poetry.lock` packages now record their source index too. (#133, thanks [@Niranjan-cyber](https://github.com/Niranjan-cyber))
 
 ## 0.7.0 (2026-11-09)

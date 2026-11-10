@@ -9,9 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import NoReturn
 
-# Debian release in the image tag -> its glibc version.
-DEBIAN_GLIBC = {"bullseye": "2.31", "bookworm": "2.36", "trixie": "2.41"}
-ALPINE_MUSL = "1.2"  # Alpine 3.13 and later; 3.12 and earlier ship musl 1.1
+from .targets import ALPINE_MUSL, DEBIAN_GLIBC
+
 _ALPINE_RE = re.compile(r"^alpine(\d+)\.(\d+)", re.ASCII)
 # docker --platform -> wheelgap arch
 ARCHES = {
