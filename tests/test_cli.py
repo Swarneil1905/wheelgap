@@ -31,7 +31,8 @@ def run(capsys, *argv):
         ("", "3.13-bookworm", ["--distro", "ubuntu-24.04", "--glibc", "2.35"], "missing"),
         ("", None, ["--glibc", "2.39", "--distro", "ubuntu-22.04"], "wheel"),
         ('distro = "ubuntu-24.04"', None, ["--glibc", "2.35"], "missing"),
-        ('distro = "ubuntu-24.04"', "3.13", [], "wheel"),
+        ('distro = "ubuntu-22.04"', "3.13", [], "wheel"),  # python:3.13 is trixie (2.41), which beats config distro
+        ('distro = "ubuntu-22.04"', "3.13.1-slim", [], "missing"),  # a patch tag sets no glibc: config distro applies
     ],
 )
 def test_distro_glibc_precedence(capsys, fixtures, tmp_path, fake_pypi, config, image, flags, expected):
