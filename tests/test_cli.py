@@ -101,10 +101,8 @@ def test_uv_required_environments_uses_selected_python(capsys, tmp_path, monkeyp
 @pytest.mark.parametrize(
     "setting,message",
     [
-        ("required-environments = [\"sys_platform == 'emscripten'\"]", "no supported native targets"),
-        ("required-environments = [\"sys_platform == 'android'\"]", "no supported native targets"),
-        ("required-environments = [\"python_version < '3.13'\"]", "no supported native targets"),
-        ('required-environments = "linux"', "list of strings"),
+        ("required-environments = 42", "a string or a list of strings"),
+        ('required-environments = "linux"', "invalid marker"),
         ("required-environments = [42]", "list of strings"),
         ('required-environments = ["sys_platform == \'linux\'", "invalid"]', "invalid marker"),
         ('required-environments = [""]', "invalid marker"),
@@ -119,6 +117,37 @@ def test_uv_required_environments_errors(capsys, tmp_path, monkeypatch, fake_pyp
     assert "error" in json.loads(out)
 
 
+def test_uv_required_environments_accepts_a_single_string(capsys, tmp_path, monkeypatch, fake_pypi):
+    # uv documents required-environments as a string or a list of strings.
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.uv]\nrequired-environments = \"sys_platform == 'win32'\"", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+    code, out, err = run(capsys, "purewheel==3.1", "-p", "3.13", "--json")
+    assert code == 0 and "required-environments" in err
+    assert [t["platform"] for t in json.loads(out)["targets"]] == ["win-amd64", "win-arm64"]
+
+
+@pytest.mark.parametrize(
+    "setting",
+    [
+        "required-environments = [\"sys_platform == 'emscripten'\"]",
+        "required-environments = [\"sys_platform == 'android'\"]",
+        "required-environments = [\"python_version < '3.13'\"]",
+    ],
+)
+def test_uv_required_environments_matching_no_target_falls_back_to_defaults(
+    capsys, tmp_path, monkeypatch, fake_pypi, setting
+):
+    # A mobile-only project, or `wheelgap requests` run in such a folder, still gets an answer.
+    (tmp_path / "pyproject.toml").write_text("[tool.uv]\n" + setting, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    code, out, err = run(capsys, "purewheel==3.1", "-p", "3.13", "--json")
+    assert code == 0
+    assert "matches none of the native targets" in err and "default targets" in err
+    assert [t["platform"] for t in json.loads(out)["targets"]] == DEFAULT_PLATFORMS
+
+
 @pytest.mark.parametrize("setting", ["", "required-environments = []", "environments = [\"sys_platform == 'linux'\"]"])
 def test_uv_required_environments_absent_or_empty(capsys, tmp_path, monkeypatch, fake_pypi, setting):
     (tmp_path / "pyproject.toml").write_text("[tool.uv]\n" + setting, encoding="utf-8")
@@ -128,7 +157,7 @@ def test_uv_required_environments_absent_or_empty(capsys, tmp_path, monkeypatch,
     assert [t["platform"] for t in json.loads(out)["targets"]] == DEFAULT_PLATFORMS
 
 
-@pytest.mark.parametrize("flags", [[], ["--markdown"], ["--quiet"]])
+@pytest.mark.parametrize("flags", [[], ["--markdown"]])
 def test_uv_required_environments_note_is_on_stderr(capsys, tmp_path, monkeypatch, fake_pypi, flags):
     (tmp_path / "pyproject.toml").write_text(
         "[tool.uv]\nrequired-environments = [\"sys_platform == 'linux'\"]", encoding="utf-8"
@@ -137,6 +166,15 @@ def test_uv_required_environments_note_is_on_stderr(capsys, tmp_path, monkeypatc
     code, out, err = run(capsys, "purewheel==3.1", "-p", "3.13", *flags)
     assert code == 0
     assert "required-environments" in err and "required-environments" not in out
+
+
+def test_uv_required_environments_note_is_hidden_with_quiet(capsys, tmp_path, monkeypatch, fake_pypi):
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.uv]\nrequired-environments = [\"sys_platform == 'linux'\"]", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+    code, out, err = run(capsys, "purewheel==3.1", "-p", "3.13", "--quiet")
+    assert code == 0 and not err and not out
 
 
 @pytest.mark.parametrize(

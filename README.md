@@ -102,8 +102,10 @@ for any selected Python, and the resulting platforms are checked for all selecte
 Linux markers select both glibc and musl targets, since markers cannot distinguish the libc;
 the example above selects `linux-aarch64` and `musl-aarch64`. Use `-t` to choose one explicitly.
 An inferred selection is explained on stderr, including with `--json` or `--markdown`.
-An absent or empty list keeps the built-in defaults; invalid markers or a nonempty list matching
-no supported target are errors. Only `required-environments` is used here: `environments`, extra
+The inferred targets replace the built-in defaults, so a project that only requires Intel macOS
+wheels is then checked for Intel macOS only: add `[tool.wheelgap] targets` or `-t` to check more.
+An absent or empty setting keeps the built-in defaults, and so does one matching none of the
+targets above (with a note). An invalid marker is an error. Only `required-environments` is used here: `environments`, extra
 Linux architectures, mobile and Pyodide targets are not inferred.
 
 Each cell in the table is one of:

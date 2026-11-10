@@ -255,8 +255,10 @@ def load_uv_targets(path: Path, pythons: list[str]) -> list[str]:
     if not isinstance(table, dict):
         raise SourceError(f"{path}: [tool.uv] must be a table")
     markers = table.get("required-environments", [])
+    if isinstance(markers, str):  # uv accepts a single marker as well as a list
+        markers = [markers]
     if not isinstance(markers, list) or not all(isinstance(m, str) for m in markers):
-        raise SourceError(f"{path}: [tool.uv] required-environments must be a list of strings")
+        raise SourceError(f"{path}: [tool.uv] required-environments must be a string or a list of strings")
     if not markers:
         return []
     # marker_holds conservatively accepts unparseable package markers. A project setting
@@ -269,9 +271,11 @@ def load_uv_targets(path: Path, pythons: list[str]) -> list[str]:
     targets = build_targets(pythons, NATIVE_PLATFORMS)
     platforms = list(dict.fromkeys(t.platform for t in targets if any(marker_holds(m, t) for m in markers)))
     if not platforms:
-        raise SourceError(
-            f"{path}: [tool.uv] required-environments matches no supported native targets "
-            f"for Python {', '.join(pythons)}; select targets explicitly with -t"
+        # e.g. a mobile-only project, or `wheelgap requests` run in a project folder: don't fail the run
+        print(
+            f"wheelgap: note: {path} [tool.uv] required-environments matches none of the native targets "
+            f"for Python {', '.join(pythons)}, so the default targets are checked; select targets with -t",
+            file=sys.stderr,
         )
     return platforms
 
@@ -680,7 +684,7 @@ def main(argv: list[str] | None = None) -> int:
         platforms = args.target or config.get("targets", [])
         if not platforms and pyproject:
             platforms = load_uv_targets(pyproject, pythons)
-            if platforms:
+            if platforms and not quiet:
                 note = (
                     f"wheelgap: note: targets from {pyproject} [tool.uv] required-environments: {', '.join(platforms)}"
                 )
