@@ -52,6 +52,18 @@ def test_range_requires_python_missing_or_invalid(monkeypatch, requires_python):
     assert pkg.version == "2" and not pkg.error
 
 
+@pytest.mark.parametrize(
+    "requires_python,python,ok",
+    [(">=3.8.1", "3.8", True), ("!=3.9.0", "3.9", True), ("<3.9.5", "3.9", False), (">=3.10", "3.9", False)],
+)
+def test_range_requires_python_patch_level_specifiers(monkeypatch, requires_python, python, ok):
+    # A target "3.8" stands for a current 3.8.x interpreter, not 3.8.0 (flake8 6 requires >=3.8.1).
+    entry = {"filename": "x-2-py3-none-any.whl", "requires_python": requires_python}
+    monkeypatch.setattr(pypi, "fetch_json", lambda url: {"releases": {"2": [entry]}})
+    pkg = pypi.fill(Package("x", None, spec=">=1"), python=python)
+    assert (pkg.version == "2") is ok
+
+
 @pytest.mark.parametrize("yanked,expected", [(False, "2"), (True, "1")])
 def test_range_requires_python_mixed_files(monkeypatch, yanked, expected):
     older = {"filename": "x-1-py3-none-any.whl", "requires_python": ">=3.8"}

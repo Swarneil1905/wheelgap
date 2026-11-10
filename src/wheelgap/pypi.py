@@ -107,7 +107,9 @@ def _supports_python(entry: dict, python: str | None) -> bool:
     if python is None or not isinstance(requires, str):
         return True
     try:
-        return SpecifierSet(requires).contains(python, prereleases=True)
+        # A real interpreter is on a later patch release than x.y.0 (pip compares sys.version_info[:3]),
+        # so `>=3.8.1` must admit 3.8 and `!=3.9.0` must admit 3.9: compare against a late patch.
+        return SpecifierSet(requires).contains(f"{python}.99")
     except InvalidSpecifier:
         return True
 
