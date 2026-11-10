@@ -99,8 +99,12 @@ def test_invalid_config_distro(capsys, tmp_path, fake_pypi, config, flags):
 @pytest.mark.parametrize("extra", [[], ["--glibc", "2.35"], ["--list-targets", "--json"]])
 def test_invalid_cli_distro(capsys, fake_pypi, extra):
     code, out, err = run(capsys, "--distro", "typo", *extra)
-    assert code == 2 and not out and not fake_pypi
+    assert code == 2 and not fake_pypi
     assert "unknown distro 'typo'" in err and "ubuntu-22.04" in err
+    if "--json" in extra:  # with --json an input error is also printed as JSON on stdout
+        assert json.loads(out)["error"]["type"] == "TargetError"
+    else:
+        assert not out
 
 
 @pytest.mark.parametrize("as_json", [False, True])
