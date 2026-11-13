@@ -49,7 +49,8 @@ Each cell is one of:
 | `–` | `n/a` | not installed on this target (environment markers exclude it, or it selects another resolution) |
 | `✓ bundled` | `bundled` | no wheel on PyPI, but Pyodide ships its own build (with `--pyodide-lock`) |
 
-Packages that are fine everywhere are hidden; `--all` shows them. With several targets, the summary also counts the
+Packages that are fine everywhere are hidden; `--all` shows them. A range that picks a different release for
+different `-p` versions is one row per release, and the summary counts each row. With several targets, the summary also counts the
 gaps on each target that has any (`musl-aarch64  1 from source, 1 missing`). Packages that weren't checked, such as
 editable, path or Git dependencies, are listed on the `skipped` line.
 

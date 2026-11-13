@@ -215,7 +215,6 @@ wheelgap is growing into **caniuse for Python wheels**: an open map of which pac
 Next up for the CLI, each with a first step written up and no PR yet:
 
 - "nearest version with a wheel" hints ([#20](https://github.com/wheelgap/wheelgap/issues/20))
-- version ranges: picking the newest release that supports each target's Python ([#84](https://github.com/wheelgap/wheelgap/issues/84))
 
 The [roadmap](https://github.com/wheelgap/wheelgap/labels/roadmap) and [help wanted](https://github.com/wheelgap/wheelgap/labels/help%20wanted) labels have more.
 
