@@ -46,7 +46,7 @@ Each cell is one of:
 | `● source` | `source` | no wheel, only an sdist, so it compiles at install time (needs a compiler, headers, time) |
 | `✗ missing` | `missing` | no wheel and no sdist, so the install fails |
 | `? unknown` | `unknown` | couldn't be looked up; the package's error says why |
-| `–` | `n/a` | not installed on this target (environment markers exclude it) |
+| `–` | `n/a` | not installed on this target (environment markers exclude it, or it selects another resolution) |
 | `✓ bundled` | `bundled` | no wheel on PyPI, but Pyodide ships its own build (with `--pyodide-lock`) |
 
 Packages that are fine everywhere are hidden; `--all` shows them. With several targets, the summary also counts the
